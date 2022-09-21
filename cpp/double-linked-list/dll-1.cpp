@@ -1,3 +1,6 @@
+/*
+ * Personal review of cpp using doubly-linked list as a vehicle.
+ */
 #include <iostream>
 
 struct Node {
@@ -18,6 +21,7 @@ private:
 
 public:
   DLL() {
+    // dummy values for head/tail
     this->head = new Node(-1, -1);
     this->tail = new Node(-2, -2);
     this->head->next = this->tail;
