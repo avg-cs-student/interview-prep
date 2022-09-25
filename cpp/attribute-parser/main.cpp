@@ -5,66 +5,97 @@
 #include <algorithm>
 using namespace std;
 
-const int MAX_VAL = 20;
-const int MAX_LINE = 200;
-const string NONE = "Not Found!";
+struct Attribute {
+    string key;
+    string value;
 
-struct Node {
-    string tag;
-    vector<string> attr;    // list of attributes
-    vector<Node*> children; // list of child nodes
-                            
-    Node(string p_tag) : tag(p_tag), attr(0), children(0) {};
-    ~Node() {
-        for (auto &child : this->children)
-            delete(child);
+    Attribute(string key, string value) : key(key), value(value) {};
+    ~Attribute() {};
+
+    void print_data() {
+        cout << this->key << " " << this->value << endl;
     }
 };
 
+struct Tag {
+    string key;
+    vector<Attribute*> attributes;
+    Tag *parent;
+    vector<Tag*> children;
 
-string query_src(string query, vector<Node*> &taglist) {
-    // stub
-    string rv = NONE;
-    
-    return query;
-}
+    Tag(string key) : key(key) {};
+    ~Tag() {
+        for (auto a : this->attributes) {
+            delete(a);
+        }
+    }
 
-Node *parse_src_line(string src) {
-    Node *rv = nullptr;
-
-    return rv;
-}
+    void print_data() {
+        cout << key << endl;
+        for (auto &a: attributes)
+            a->print_data();
+    }
+};
 
 int main() {
-
-    int n; // number of lines in src program
-    int q; // number of queries
-    vector<Node*> taglist;
-    
-    // line 1, get n and q
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */   
+    int n, q;
     cin >> n >> q;
-    cin.ignore(); // consume '\n'
-    
-    char src[n][MAX_LINE];
-    int src_index = 0;
+    cin.ignore();
 
-    // parse src hrml
-    for (int line_index = 0; line_index < n; line_index++) {
-        cin.getline(src[line_index], MAX_LINE);
+    vector<Tag*> tag_stack;
+
+    /* grab src code */
+    string src_buff;
+    for (int i = 0; i < n/2; ++i) {
+        getline(cin, src_buff);
+        // if we find a '/' in the second position, it's a closing tag
+        if (src_buff[1] == '/') {
+            --i;
+            continue;
+        }
+
+        size_t cur = src_buff.find(' ');
+        if (cur == string::npos)
+            cur = src_buff.length() - 2;
+
+        tag_stack.push_back(new Tag(src_buff.substr(1, cur)));
+
+        /* check for attributes */
+        bool hasAttr = true;
+        do {
+            cur = src_buff.find_first_not_of(" ", cur);
+            size_t end_of_attr = src_buff.find("=", cur);
+            
+            /* go to next tag if no '=' is found */
+            if (end_of_attr == string::npos) {
+                hasAttr = false;         
+                break;
+            }
+            
+            string attr = src_buff.substr(cur, end_of_attr - cur);
+            cur = src_buff.find("\"", end_of_attr);
+            end_of_attr = src_buff.find("\"", cur+1);
+            string attr_data = src_buff.substr(cur+1, end_of_attr - cur -1);
+
+            /* add attribute to corresponding tag */
+            tag_stack[i]->attributes.push_back(new Attribute(attr, attr_data));
+        } while (hasAttr);
+        
     }
-    
-    // store queries
-    char query[q][MAX_LINE];
-    for (int i = 0; i < q; i++) {
-        cin.getline(query[i], MAX_LINE);
+
+    string query;
+    for (int i = 0; i < q; ++i) {
+        size_t cur = 0;
+        getline(cin, query);
+        size_t tag_end = query.find(".");
+        while (tag_end != string::npos) {
+            string tag = query.substr(cur, tag_end);
+            cout << tag << endl;
+            break;
+        }
     }
-    
-    // evaluate queries
-    for (int i = 0; i < q; i++) {
-        cout << query_src(query[i], taglist) << endl;
-    }
-    
-    
+
     return 0;
 }
 
