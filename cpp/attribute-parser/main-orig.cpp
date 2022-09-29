@@ -97,7 +97,7 @@ int main() {
         } 
 
         cout << "Last tag:\t";
-        cout << query.substr(cur, q_end) << endl;
+        cout << query.substr(cur, query.find("~")) << endl;
         cout << "selecting:\t";
         cout << query.substr(q_end + 1, query.find('\n')) << endl;
 //        subquery = query.substr(cur, subq_end);
